@@ -219,13 +219,7 @@ table.grid th.slothead,table.grid td.slottd{width:92px;background:#fafbfe;text-a
         people.forEach(function(p){
           var cs=p.courses.filter(function(c){return c.day===d && active(c,currentWeek) && intersect(c,i);});
           if(cs.length){
-            if(p.busyOnly){
-              h+='<span class="chip" style="background:'+p.color+'">有课</span>';
-            } else {
-              cs.forEach(function(c){
-                h+='<span class="chip" style="background:'+p.color+'" title="'+esc(c.teacher||'')+' '+esc(c.location||'')+'">'+esc(c.name)+'</span>';
-              });
-            }
+            h+='<span class="chip" style="background:'+p.color+'">有课</span>';
           } else {
             h+='<span class="freespan">'+esc(p.name)+'·空闲</span>';
           }
@@ -254,13 +248,8 @@ table.grid th.slothead,table.grid td.slottd{width:92px;background:#fafbfe;text-a
         } else {
           h+='<td class="compcell">';
           busy.forEach(function(o){
-            h+='<div class="busygroup"><span class="chip" style="background:'+o.p.color+'">'+esc(o.p.name)+'</span>';
-            if(o.p.busyOnly){
-              h+='<span class="chip" style="background:'+hexToRgba(o.p.color,0.85)+'">有课</span>';
-            } else {
-              o.cs.forEach(function(c){ h+='<span class="chip" style="background:'+hexToRgba(o.p.color,0.85)+'">'+esc(c.name)+'</span>'; });
-            }
-            h+='</div>';
+            h+='<div class="busygroup"><span class="chip" style="background:'+o.p.color+'">'+esc(o.p.name)+'</span>'
+              +'<span class="chip" style="background:'+hexToRgba(o.p.color,0.85)+'">有课</span></div>';
           });
           if(free.length){ h+='<div class="busytitle">空闲：'+free.map(function(p){return esc(p.name);}).join('、')+'</div>'; }
           h+='</td>';

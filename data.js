@@ -1,7 +1,7 @@
 // ============================================================
 //  课表数据 · 直接编辑本文件即可，无需改动 index.html
 // ============================================================
-//  已录入 3 人：吴奇乐、姚骁航、相怡帆（2026-2027-1 学期）
+//  已录入 4 人：吴奇乐、李佳音、姚骁航、相怡帆（2026-2027-1 学期）
 //  要加人：复制 people 里任意一个对象，改 name / color / courses 即可。
 // ============================================================
 
@@ -36,8 +36,6 @@ window.SCHEDULE_DATA = {
   //   periods    节次区间：[起始节, 结束节]
   //   weeks      上课周次（写法见文件底部说明）
   //   teacher / location  老师、教室（选填）
-  //   busyOnly   true 时：对比视图/共同空闲视图里只显示“有课/空闲”，
-  //              不显示课程名（个人课表视图仍显示）。想显示课程名就删掉这行。
   people: [
     {
       name: "吴奇乐",
@@ -59,7 +57,6 @@ window.SCHEDULE_DATA = {
         { name: "控制工程基础", day: 4, periods: [3, 4],  weeks: "1-8",       teacher: "李蔚",        location: "世主407" },
         { name: "铁路运输组织", day: 4, periods: [5, 6],  weeks: "1-4",       teacher: "刘宏康、甘宁", location: "世A104" },
         { name: "改革开放史",   day: 4, periods: [7, 8],  weeks: "11-18单",   teacher: "李淼磊",      location: "世A105" },
-        { name: "中华诗词之美", day: 4, periods: [9, 10], weeks: "1-10",      teacher: "晏选军",      location: "" },
         { name: "毛泽东思想和中国特色社会主义理论体系概论", day: 5, periods: [3, 4], weeks: "1-9,12-18", teacher: "王稳良", location: "世B201" },
         { name: "控制工程基础", day: 5, periods: [5, 6],  weeks: "1-8",       teacher: "李蔚",        location: "世主407" },
         { name: "铁路运输组织", day: 5, periods: [9, 10], weeks: "1-4",       teacher: "刘宏康、甘宁", location: "世A104" }
@@ -67,9 +64,33 @@ window.SCHEDULE_DATA = {
     },
 
     {
+      name: "李佳音",
+      color: "#f0a63a",
+      courses: [
+        { name: "测试技术与信号处理", day: 1, periods: [1, 2],  weeks: "1-8",       teacher: "肖友刚",      location: "世A103" },
+        { name: "测试技术与信号处理", day: 2, periods: [1, 2],  weeks: "1-8",       teacher: "肖友刚",      location: "世A203" },
+        { name: "机械设计基础A",   day: 4, periods: [1, 2],  weeks: "1-9,12-18", teacher: "颜海燕",      location: "世B102" },
+        { name: "中国共产党的历史", day: 5, periods: [1, 2],  weeks: "11-18单",   teacher: "王翔",        location: "世B502" },
+        { name: "机车车辆工程",     day: 1, periods: [3, 4],  weeks: "4-9,12-18", teacher: "汪馗、张书增", location: "世A104" },
+        { name: "机车车辆工程",     day: 2, periods: [3, 4],  weeks: "4-9,12-18", teacher: "汪馗、张书增", location: "世A104" },
+        { name: "形势与政策",       day: 4, periods: [3, 4],  weeks: "9,13",      teacher: "傅建平",      location: "世B201" },
+        { name: "控制工程基础",     day: 4, periods: [3, 4],  weeks: "1-8",       teacher: "李蔚",        location: "世主407" },
+        { name: "毛泽东思想和中国特色社会主义理论体系概论", day: 5, periods: [3, 4], weeks: "1-9,12-18", teacher: "王稳良", location: "世B201" },
+        { name: "机械设计基础A",   day: 1, periods: [5, 6],  weeks: "1-9,12-18", teacher: "颜海燕",      location: "世B101" },
+        { name: "互换性与技术测量", day: 2, periods: [5, 6],  weeks: "1-8",       teacher: "李蔚",        location: "世主405" },
+        { name: "铁路运输组织",     day: 4, periods: [5, 6],  weeks: "1-4",       teacher: "甘宁、刘宏康", location: "世A104" },
+        { name: "控制工程基础",     day: 5, periods: [5, 6],  weeks: "1-8",       teacher: "李蔚",        location: "世主407" },
+        { name: "积分变换",         day: 1, periods: [7, 8],  weeks: "7-9,12-14", teacher: "伍钒、钱博森", location: "世B102" },
+        { name: "积分变换",         day: 2, periods: [7, 8],  weeks: "7-9,12-14", teacher: "伍钒、钱博森", location: "世B102" },
+        { name: "互换性与技术测量", day: 5, periods: [7, 8],  weeks: "1-8",       teacher: "李蔚",        location: "世主304" },
+        { name: "机车车辆工程",     day: 3, periods: [9, 10], weeks: "17-18",    teacher: "汪馗、张书增", location: "世A102" },
+        { name: "铁路运输组织",     day: 5, periods: [9, 10], weeks: "1-4",      teacher: "甘宁、刘宏康", location: "世A104" }
+      ]
+    },
+
+    {
       name: "姚骁航",
       color: "#35c08f",
-      busyOnly: true,
       courses: [
         { name: "测试技术与信号处理", day: 1, periods: [1, 2], weeks: "1-8",       teacher: "谢劲松",      location: "世B104" },
         { name: "工程流体力学",     day: 1, periods: [1, 2], weeks: "9,12-18",   teacher: "王家斌、杨明智", location: "世A104" },
@@ -89,7 +110,6 @@ window.SCHEDULE_DATA = {
         { name: "积分变换",         day: 2, periods: [7, 8], weeks: "7-9,12-14", teacher: "伍钒、钱博森", location: "世B102" },
         { name: "健康心理学",       day: 2, periods: [9, 10], weeks: "3-18",     teacher: "彭立静",      location: "B座207" },
         { name: "机车车辆工程",     day: 3, periods: [9, 10], weeks: "17-18",    teacher: "汪馗、张书增", location: "世A102" },
-        { name: "视觉与艺术",       day: 4, periods: [9, 10], weeks: "1-10",     teacher: "毛寒",        location: "" },
         { name: "铁路运输组织",     day: 5, periods: [9, 10], weeks: "1-4",      teacher: "甘宁、刘宏康", location: "世A104" }
       ]
     },
@@ -97,7 +117,6 @@ window.SCHEDULE_DATA = {
     {
       name: "相怡帆",
       color: "#f26d6d",
-      busyOnly: true,
       courses: [
         { name: "制造工程训练C", day: 5, periods: [1, 2], weeks: "3-18", teacher: "多位教师", location: "" },
         { name: "创新创业与工程导论", day: 1, periods: [3, 4], weeks: "11-18", teacher: "刘一顺", location: "B座517" },
@@ -119,8 +138,7 @@ window.SCHEDULE_DATA = {
         { name: "先进检测技术与仪表", day: 4, periods: [7, 8], weeks: "2",     teacher: "凌玉华", location: "B座511" },
         { name: "EDA技术与应用",      day: 5, periods: [7, 8], weeks: "3-10",  teacher: "樊欣宇", location: "B座511" },
         { name: "中国文学经典与中国精神", day: 2, periods: [9, 10], weeks: "3-18", teacher: "唐苗",   location: "B座314" },
-        { name: "EDA技术与应用",      day: 3, periods: [9, 10], weeks: "3-10",  teacher: "樊欣宇", location: "B座518" },
-        { name: "艺术导论",           day: 4, periods: [9, 10], weeks: "1-10",  teacher: "邓海燕", location: "" }
+        { name: "EDA技术与应用",      day: 3, periods: [9, 10], weeks: "3-10",  teacher: "樊欣宇", location: "B座518" }
       ]
     }
   ]
@@ -138,5 +156,6 @@ window.SCHEDULE_DATA = {
 //  无固定节次的补充事项（未列入表格）：
 //    吴奇乐：认识实习 第10-11周；体育课外测试(一) 第1-9、12-18周
 //    姚骁航：认识实习 潘彤阳、张书增 第10-11周
+//    李佳音：认识实习 潘彤阳、张书增 第10-11周
 //    相怡帆：EDA技术与应用课程设计 樊欣宇 第18、21周
 // ============================================================

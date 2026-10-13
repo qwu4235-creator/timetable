@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课表查看器 · 多人空闲时间对比</title>
+<style>
+:root{
+  --bg:#f5f7fb; --card:#fff; --line:#e3e8f0; --text:#1f2a3a; --muted:#8a94a6;
+  --free:#eef3fb; --free-text:#b4c0d4; --brand:#2f6bff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);}
+header{background:#fff;border-bottom:1px solid var(--line);padding:16px 20px;position:sticky;top:0;z-index:10;}
+h1{font-size:20px;margin:0 0 2px;}
+.sub{color:var(--muted);font-size:13px;}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px;}
+.weekbar{display:flex;align-items:center;gap:6px;}
+.wk-nav{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;color:#333;}
+.wk-nav:hover{background:#f0f4ff;}
+.weekchips{display:flex;gap:4px;overflow-x:auto;max-width:62vw;padding:2px;}
+.wkchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;white-space:nowrap;color:#37455c;}
+.wkchip:hover{border-color:#b9c6de;}
+.wkchip.active{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600;}
+.viewswitch{display:flex;gap:6px;margin-left:auto;}
+.viewbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;color:#37455c;}
+.viewbtn.active{background:#eef2ff;border-color:var(--brand);color:var(--brand);font-weight:600;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:#37455c;}
+.legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+main{padding:20px;}
+.persontabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.ptab{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 16px;font-size:14px;cursor:pointer;color:#37455c;}
+.ptab.active{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600;}
+.gridwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;box-shadow:0 1px 3px rgba(16,24,40,.05);}
+table.grid{border-collapse:collapse;width:100%;min-width:860px;}
+table.grid th,table.grid td{border:1px solid var(--line);vertical-align:top;text-align:left;padding:8px;}
+table.grid thead th{background:#fafbfe;font-size:14px;text-align:center;padding:10px 8px;font-weight:600;}
+table.grid th.slothead,table.grid td.slottd{width:92px;background:#fafbfe;text-align:center;}
+.slotlabel{font-weight:600;font-size:13px;}
+.slottime{color:var(--muted);font-size:11px;margin-top:2px;}
+.coursecell{background:#eef2ff;}
+.cname{font-weight:600;font-size:13px;color:#1f2a3a;}
+.cdetail{font-size:11px;color:#5b6a82;margin-top:2px;}
+.freecell{color:var(--free-text);font-size:12px;text-align:center;background:var(--free);}
+.compcell{min-width:118px;}
+.chip{display:inline-block;font-size:12px;border-radius:6px;padding:3px 8px;margin:2px;color:#fff;line-height:1.5;}
+.freespan{display:block;font-size:11px;color:#9aa7bd;padding:2px 4px;}
+.freeall{background:#e6f7ee;color:#12805c;font-weight:600;text-align:center;font-size:13px;min-width:118px;}
+.busygroup{margin:3px 0;}
+.busytitle{font-size:11px;color:#5b6a82;margin-top:2px;}
+.hint{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.6;}
+.badge{display:inline-block;font-size:11px;color:var(--brand);background:#eef2ff;border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:2px;}
+@media (max-width:640px){ .weekchips{max-width:100%;} .viewswitch{margin-left:0;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>课表查看器 <span class="badge" id="semester"></span></h1>
+  <div class="sub">多人一周课表 · 空闲时间对比 · 按周切换</div>
+  <div class="toolbar">
+    <div class="weekbar">
+      <button class="wk-nav" id="prevWeek" title="上一周">‹</button>
+      <div class="weekchips" id="weekChips"></div>
+      <button class="wk-nav" id="nextWeek" title="下一周">›</button>
+    </div>
+    <div class="viewswitch" id="viewSwitch">
+      <button class="viewbtn active" data-view="compare">对比视图</button>
+      <button class="viewbtn" data-view="free">共同空闲</button>
+      <button class="viewbtn" data-view="person">个人课表</button>
+    </div>
+  </div>
+  <div class="legend" id="legend"></div>
+</header>
+<main>
+  <div class="persontabs" id="personTabs" style="display:none"></div>
+  <div class="gridwrap" id="grid"></div>
+  <div class="hint" id="hint"></div>
+</main>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  var data = window.SCHEDULE_DATA;
+  var days = data.days || ["周一","周二","周三","周四","周五","周六","周日"];
+  var slots = data.slots || [];
+  var people = data.people || [];
+  var totalWeeks = Number(data.totalWeeks) || 20;
+  var currentWeek = Number(data.defaultWeek) || 1;
+  var currentView = 'compare';
+  var currentPerson = 0;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function hexToRgba(hex, a){
+    hex = (hex||'#4f8ef7').replace('#','');
+    if(hex.length===3) hex = hex.split('').map(function(c){return c+c;}).join('');
+    var n = parseInt(hex,16);
+    var r=(n>>16)&255, g=(n>>8)&255, b=n&255;
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }
+  var palette = ['#4f8ef7','#f26d6d','#35c08f','#f0a63a','#9a6cf0','#20b2c8'];
+
+  function parseWeeks(weeks, total){
+    var set = new Set();
+    if(Object.prototype.toString.call(weeks)==='[object Array]'){
+      weeks.forEach(function(w){ var n=Number(w); if(Number.isInteger(n)&&n>=1&&n<=total) set.add(n); });
+      return set;
+    }
+    if(weeks==null || String(weeks).trim()===''){
+      for(var i=1;i<=total;i++) set.add(i);
+      return set;
+    }
+    var s = String(weeks).trim();
+    var parity = null;
+    if(/单/.test(s)) parity='odd';
+    if(/双/.test(s)) parity='even';
+    s = s.replace(/[周第单双（）()\[\]]/g,'');
+    var parts = s.split(/[,，、\s;；]+/).filter(Boolean);
+    parts.forEach(function(p){
+      var m = p.match(/^(\d+)\s*[-~—–]\s*(\d+)$/);
+      if(m){ var a=+m[1], b=+m[2]; for(var i=a;i<=b;i++) if(i>=1&&i<=total) set.add(i); }
+      else if(/^\d+$/.test(p)){ var n=+p; if(n>=1&&n<=total) set.add(n); }
+    });
+    if(parity==='odd') set.forEach(function(w){ if(w%2===0) set.delete(w); });
+    if(parity==='even') set.forEach(function(w){ if(w%2===1) set.delete(w); });
+    return set;
+  }
+
+  function normalizeDay(d){
+    if(typeof d==='number') return d;
+    var s = String(d).trim();
+    for(var i=0;i<days.length;i++){
+      var a = days[i].replace(/星期|周/g,''), b = s.replace(/星期|周/g,'');
+      if(a===b) return i+1;
+    }
+    var m = s.match(/(\d)/); if(m) return Math.min(Math.max(Number(m[1]),1),7);
+    return 1;
+  }
+  function normalizePeriods(p){
+    if(!Array.isArray(p)) return [1,2];
+    if(p.length===1) return [p[0],p[0]];
+    return [Math.min(p[0],p[p.length-1]), Math.max(p[0],p[p.length-1])];
+  }
+
+  people.forEach(function(p,i){
+    p.color = p.color || palette[i%palette.length];
+    p.courses = (p.courses||[]).map(function(c){
+      return {
+        name:c.name, teacher:c.teacher, location:c.location,
+        day: normalizeDay(c.day),
+        periods: normalizePeriods(c.periods),
+        _weeks: parseWeeks(c.weeks, totalWeeks)
+      };
+    });
+  });
+
+  function active(c, week){ return c._weeks.has(week); }
+  function intersect(c, slotIdx){
+    var s = slots[slotIdx];
+    var ss=s.periods[0], se=s.periods[s.periods.length-1];
+    return c.periods[0]<=se && c.periods[1]>=ss;
+  }
+  function slotSpan(c){
+    var first=-1, last=-1;
+    for(var i=0;i<slots.length;i++){ if(intersect(c,i)){ if(first<0)first=i; last=i; } }
+    return first<0 ? null : {first:first, last:last, rowspan:last-first+1};
+  }
+
+  function renderWeekChips(){
+    var box=$('weekChips'); box.innerHTML='';
+    for(var w=1;w<=totalWeeks;w++){
+      (function(w){
+        var b=document.createElement('button');
+        b.className='wkchip'+(w===currentWeek?' active':'');
+        b.textContent='第'+w+'周';
+        b.onclick=function(){ currentWeek=w; refresh(); };
+        box.appendChild(b);
+      })(w);
+    }
+    var act=box.querySelector('.active'); if(act) act.scrollIntoView({inline:'center', block:'nearest'});
+  }
+
+  function renderLegend(){
+    var box=$('legend'); box.innerHTML='';
+    people.forEach(function(p){
+      box.insertAdjacentHTML('beforeend','<span><span class="dot" style="background:'+p.color+'"></span>'+esc(p.name)+'</span>');
+    });
+    box.insertAdjacentHTML('beforeend','<span><span class="dot" style="background:#e3e9f2"></span>空闲</span>');
+  }
+
+  function renderTabs(){
+    var box=$('personTabs');
+    box.style.display = currentView==='person' ? 'flex':'none';
+    box.innerHTML='';
+    people.forEach(function(p,i){
+      var b=document.createElement('button');
+      b.className='ptab'+(i===currentPerson?' active':'');
+      b.textContent=p.name;
+      b.onclick=function(){ currentPerson=i; refresh(); };
+      box.appendChild(b);
+    });
+  }
+
+  function tableHead(){
+    var h='<table class="grid"><thead><tr><th class="slothead">节次</th>';
+    days.forEach(function(d){ h+='<th>'+esc(d)+'</th>'; });
+    h+='</tr></thead><tbody>';
+    return h;
+  }
+  function slotTd(s){ return '<td class="slottd"><div class="slotlabel">'+esc(s.label||'')+'</div><div class="slottime">'+esc(s.time||'')+'</div></td>'; }
+
+  function renderCompare(){
+    var h=tableHead();
+    for(var i=0;i<slots.length;i++){
+      var s=slots[i];
+      h+='<tr>'+slotTd(s);
+      for(var d=1;d<=days.length;d++){
+        h+='<td class="compcell">';
+        people.forEach(function(p){
+          var cs=p.courses.filter(function(c){return c.day===d && active(c,currentWeek) && intersect(c,i);});
+          if(cs.length){
+            if(p.busyOnly){
+              h+='<span class="chip" style="background:'+p.color+'">有课</span>';
+            } else {
+              cs.forEach(function(c){
+                h+='<span class="chip" style="background:'+p.color+'" title="'+esc(c.teacher||'')+' '+esc(c.location||'')+'">'+esc(c.name)+'</span>';
+              });
+            }
+          } else {
+            h+='<span class="freespan">'+esc(p.name)+'·空闲</span>';
+          }
+        });
+        h+='</td>';
+      }
+      h+='</tr>';
+    }
+    h+='</tbody></table>';
+    return h;
+  }
+
+  function renderFree(){
+    var h=tableHead();
+    for(var i=0;i<slots.length;i++){
+      var s=slots[i];
+      h+='<tr>'+slotTd(s);
+      for(var d=1;d<=days.length;d++){
+        var busy=[], free=[];
+        people.forEach(function(p){
+          var cs=p.courses.filter(function(c){return c.day===d && active(c,currentWeek) && intersect(c,i);});
+          if(cs.length) busy.push({p:p,cs:cs}); else free.push(p);
+        });
+        if(busy.length===0){
+          h+='<td class="freeall">✅ 全员空闲</td>';
+        } else {
+          h+='<td class="compcell">';
+          busy.forEach(function(o){
+            h+='<div class="busygroup"><span class="chip" style="background:'+o.p.color+'">'+esc(o.p.name)+'</span>';
+            if(o.p.busyOnly){
+              h+='<span class="chip" style="background:'+hexToRgba(o.p.color,0.85)+'">有课</span>';
+            } else {
+              o.cs.forEach(function(c){ h+='<span class="chip" style="background:'+hexToRgba(o.p.color,0.85)+'">'+esc(c.name)+'</span>'; });
+            }
+            h+='</div>';
+          });
+          if(free.length){ h+='<div class="busytitle">空闲：'+free.map(function(p){return esc(p.name);}).join('、')+'</div>'; }
+          h+='</td>';
+        }
+      }
+      h+='</tr>';
+    }
+    h+='</tbody></table>';
+    return h;
+  }
+
+  function renderPerson(){
+    var p=people[currentPerson];
+    if(!p) return '<div class="hint">暂无人员数据，请在 data.js 里添加。</div>';
+    var blocks=[];
+    p.courses.forEach(function(c){
+      if(!active(c,currentWeek)) return;
+      var sp=slotSpan(c); if(!sp) return;
+      blocks.push({c:c, day:c.day, first:sp.first, last:sp.last, rowspan:sp.rowspan});
+    });
+    var occ=new Set();
+    var h=tableHead();
+    for(var i=0;i<slots.length;i++){
+      var s=slots[i];
+      h+='<tr>'+slotTd(s);
+      for(var d=1;d<=days.length;d++){
+        var key=i+'-'+d;
+        if(occ.has(key)) continue;
+        var blk=blocks.find(function(b){return b.first===i && b.day===d;});
+        if(blk){
+          for(var r=0;r<blk.rowspan;r++) occ.add((i+r)+'-'+d);
+          var bg=hexToRgba(p.color,0.13);
+          h+='<td class="coursecell" rowspan="'+blk.rowspan+'" style="background:'+bg+';border-left:3px solid '+p.color+'">'
+            +'<div class="cname">'+esc(blk.c.name)+'</div>'
+            +(blk.c.teacher?'<div class="cdetail">👤 '+esc(blk.c.teacher)+'</div>':'')
+            +(blk.c.location?'<div class="cdetail">📍 '+esc(blk.c.location)+'</div>':'')
+            +'</td>';
+        } else {
+          h+='<td class="freecell">空闲</td>';
+        }
+      }
+      h+='</tr>';
+    }
+    h+='</tbody></table>';
+    return h;
+  }
+
+  function refresh(){
+    renderWeekChips();
+    renderLegend();
+    renderTabs();
+    $('semester').textContent = data.semester||'';
+    $('hint').textContent = '当前显示：第 '+currentWeek+' 周（共 '+totalWeeks+' 周）。周次可在顶部切换。';
+    var g=$('grid');
+    if(currentView==='compare') g.innerHTML=renderCompare();
+    else if(currentView==='free') g.innerHTML=renderFree();
+    else g.innerHTML=renderPerson();
+    document.querySelectorAll('.viewbtn').forEach(function(b){ b.classList.toggle('active', b.dataset.view===currentView); });
+  }
+
+  $('prevWeek').onclick=function(){ if(currentWeek>1){currentWeek--; refresh();} };
+  $('nextWeek').onclick=function(){ if(currentWeek<totalWeeks){currentWeek++; refresh();} };
+  document.querySelectorAll('.viewbtn').forEach(function(b){
+    b.onclick=function(){ currentView=b.dataset.view; if(currentView==='person'&&!people[currentPerson]) currentPerson=0; refresh(); };
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>

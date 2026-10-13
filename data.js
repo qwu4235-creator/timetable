@@ -138,7 +138,11 @@ window.SCHEDULE_DATA = {
         { name: "先进检测技术与仪表", day: 4, periods: [7, 8], weeks: "2",     teacher: "凌玉华", location: "B座511" },
         { name: "EDA技术与应用",      day: 5, periods: [7, 8], weeks: "3-10",  teacher: "樊欣宇", location: "B座511" },
         { name: "中国文学经典与中国精神", day: 2, periods: [9, 10], weeks: "3-18", teacher: "唐苗",   location: "B座314" },
-        { name: "EDA技术与应用",      day: 3, periods: [9, 10], weeks: "3-10",  teacher: "樊欣宇", location: "B座518" }
+        { name: "EDA技术与应用",      day: 3, periods: [9, 10], weeks: "3-10",  teacher: "樊欣宇", location: "B座518" },
+        // ---- 手动添加（一整个上午 = 1-4 节）----
+        { name: "课程", day: 3, periods: [1, 4], weeks: "6", teacher: "", location: "" },
+        { name: "课程", day: 1, periods: [1, 4], weeks: "7", teacher: "", location: "" },
+        { name: "课程", day: 1, periods: [1, 4], weeks: "8", teacher: "", location: "" }
       ]
     }
   ]
